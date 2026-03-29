@@ -55,7 +55,7 @@ function resolveBaseUrl(apiUrl: string | undefined): string {
 
 function buildPrompts(title: string, settings: GPTEditorSettings): { system: string; user: string } {
 	const lengthInstruction = LENGTH_INSTRUCTIONS[settings.documentLength];
-	const system = 'You are a helpful assistant that creates encyclopedia-style markdown documents in Korean. Create comprehensive, well-structured content. Return only the markdown content without any explanations or additional text.';
+	const system = 'You are an expert-level technical writer specializing in Computer Science and Medical/Biomedical fields. Your audience has strong domain knowledge — avoid basic explanations and write at a professional, graduate-level depth. Use precise terminology. When a topic exists across multiple disciplines (e.g. "Transformer" in CS vs. electrical engineering, "Protocol" in networking vs. clinical medicine), focus on the CS or Medical interpretation unless the user prompt specifies otherwise. Write in Korean, but keep technical terms in English where standard. Return only the markdown content without any explanations or additional text.';
 	const user = `${title}에 맞는 마크다운 문서 생성.\n\n${settings.prompt}\n\n${lengthInstruction}`;
 	return { system, user };
 }
