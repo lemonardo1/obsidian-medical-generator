@@ -2,6 +2,7 @@ import { ItemView, Notice, TFile } from 'obsidian';
 import type { WorkspaceLeaf } from 'obsidian';
 import type { GPTEditorPluginInterface } from './types';
 import { callGPTAPI } from './gpt-service';
+import { getAllPresets } from './settings';
 
 export const VIEW_TYPE_GPT_EDITOR = 'gpt-editor-view';
 
@@ -20,7 +21,7 @@ export class GPTEditorView extends ItemView {
 	}
 
 	getDisplayText() {
-		return 'GPT Editor';
+		return 'AI 문서 편집기';
 	}
 
 	getIcon() {
@@ -32,30 +33,53 @@ export class GPTEditorView extends ItemView {
 		contentEl.empty();
 		contentEl.addClass('gpt-editor-view');
 
-		// 제목 추가
+		// 제목
 		const titleEl = contentEl.createEl('h2', {
-			text: 'GPT 문서 편집기',
+			text: 'AI 문서 편집기',
 		});
 		titleEl.addClass('gpt-editor-title');
 
-		// 설명 및 프롬프트 안내 추가
-		const promptText = [
-			'문서 제목에 맞는 마크다운 문서 생성. 백과사전 느낌으로, 한국어 문서 생성. 용어는 영어로 사용해도 괜찮다.',
-			'',
-			'문서 마지막에는',
-			'',
-			'---',
-			'',
-			'관련 문서: [[다른 문서명]], [[다른 문서명2]]',
-			'',
-			'이런식으로 형식 맞춰줘. 관련 문서명은 새롭게 추천해서 추가.',
-		].join('\n');
+		// 간단한 설명
 		const descEl = contentEl.createEl('p', {
-			text: `현재 열린 마크다운 문서의 제목에 맞는 백과사전 스타일 문서를 생성합니다.------\n\n프롬프트 예시:\n${promptText}`,
+			text: '현재 열린 마크다운 문서의 제목에 맞는 문서를 생성합니다.',
 		});
 		descEl.addClass('gpt-editor-description');
 
-		// 버튼 추가
+		// 프리셋 선택 드롭다운
+		const presetRow = contentEl.createDiv('gpt-editor-preset-row');
+		const presetLabel = presetRow.createEl('label', {
+			text: '프리셋',
+			cls: 'gpt-editor-preset-label',
+		});
+
+		const presetSelect = presetRow.createEl('select', {
+			cls: 'gpt-editor-preset-select dropdown',
+		});
+
+		const allPresets = getAllPresets(this.plugin.settings);
+		for (const preset of allPresets) {
+			const option = presetSelect.createEl('option', {
+				text: preset.isBuiltIn ? `[기본] ${preset.name}` : preset.name,
+				value: preset.id,
+			});
+			if (preset.id === this.plugin.settings.activePresetId) {
+				option.selected = true;
+			}
+		}
+
+		presetSelect.addEventListener('change', async () => {
+			this.plugin.settings.activePresetId = presetSelect.value;
+			const selected = allPresets.find((p) => p.id === presetSelect.value);
+			if (selected) {
+				this.plugin.settings.prompt = selected.prompt;
+			}
+			await this.plugin.saveSettings();
+		});
+
+		presetLabel.htmlFor = 'gpt-editor-preset-select';
+		presetSelect.id = 'gpt-editor-preset-select';
+
+		// 버튼
 		const buttonEl = contentEl.createEl('button', {
 			text: '문서 생성하기',
 		});
@@ -81,7 +105,6 @@ export class GPTEditorView extends ItemView {
 			return;
 		}
 
-		// 파일명에서 제목 추출 (확장자 제거)
 		const title = activeFile.basename;
 
 		const statusContainer = this.ensureStatusContainer();
@@ -127,7 +150,6 @@ export class GPTEditorView extends ItemView {
 			return;
 		}
 
-		// 문서 내용 업데이트
 		try {
 			await this.app.vault.modify(activeFile, result.content);
 			new Notice(
@@ -227,4 +249,3 @@ export class GPTEditorView extends ItemView {
 		this.app.workspace.setActiveLeaf(leaf, { focus: true });
 	}
 }
-
