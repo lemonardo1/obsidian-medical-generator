@@ -93,7 +93,7 @@ export const DEFAULT_SETTINGS: GPTEditorSettings = {
 	geminiApiKey: '',
 	geminiModel: 'gemini-3-pro-preview',
 	claudeApiKey: '',
-	claudeModel: 'claude-sonnet-4-20250514',
+	claudeModel: 'claude-sonnet-4-6',
 	documentLength: 'medium',
 	prompt: BUILT_IN_PRESETS[0].prompt,
 	promptPresets: [],

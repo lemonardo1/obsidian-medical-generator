@@ -126,9 +126,8 @@ export class GPTEditorSettingTab extends PluginSettingTab {
 				.setDesc('사용할 Claude 모델을 선택하세요.')
 				.addDropdown((dropdown) =>
 					dropdown
-						.addOption('claude-sonnet-4-20250514', 'Claude Sonnet 4')
-						.addOption('claude-opus-4-20250514', 'Claude Opus 4')
-						.addOption('claude-haiku-3-5-20241022', 'Claude Haiku 3.5')
+						.addOption('claude-sonnet-4-6', 'Claude Sonnet 4.6')
+						.addOption('claude-opus-4-6', 'Claude Opus 4.6')
 						.setValue(this.plugin.settings.claudeModel)
 						.onChange(async (value) => {
 							this.plugin.settings.claudeModel = value;
